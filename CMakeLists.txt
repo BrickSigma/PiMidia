@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+add_subdirectory(./thirdparty/portaudio EXCLUDE_FROM_ALL)
+
 set(PROJECT_SOURCES
     src/main.cpp
     src/pimidia.cpp
@@ -44,7 +46,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(PiMidia PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(PiMidia PRIVATE Qt${QT_VERSION_MAJOR}::Widgets PRIVATE PortAudio)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
