@@ -1,7 +1,6 @@
 #ifndef CIRCULAR_QUEUE_HPP
 #define CIRCULAR_QUEUE_HPP
 
-#include <iostream>
 #include <atomic>
 
 template <typename Element, std::size_t size>
@@ -13,11 +12,14 @@ public:
         Capacity = size + 1
     };
 
-    CircularQueue() : _tail(0), _head(0), _array{0}
+    CircularQueue() : _tail(0), _head(0)
     {
+        _array = new Element[Capacity];
     }
 
-    virtual ~CircularQueue() {}
+    virtual ~CircularQueue() {
+        delete[] _array;
+    }
 
     bool push(Element &item)
     {
@@ -63,7 +65,7 @@ private:
 
     std::atomic<std::size_t> _tail;
     std::atomic<std::size_t> _head;
-    Element _array[Capacity];
+    Element *_array;
 };
 
 #endif // CIRCULAR_QUEUE_HPP

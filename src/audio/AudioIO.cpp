@@ -1,8 +1,9 @@
 #include "AudioIO.h"
 
+#include <iostream>
 #include <stdio.h>
 
-#define PA_ERROR_OUTPUT(err) (printf("PortAudio error: %s\n", Pa_GetErrorText(err)))
+#define PA_ERROR_OUTPUT(err) (std::cout << "PortAudio error: " << Pa_GetErrorText(err) << std::endl)
 
 // Initialize static members
 PaStream *AudioIO::_stream = nullptr;
@@ -41,7 +42,7 @@ int AudioIO::recordCallback(const void *inputBuffer, void *outputBuffer,
     StreamData sData;
     if (inputBuffer == nullptr)
     {
-        for (int i = 0; i < framesPerBuffer; i++)
+        for (unsigned long i = 0; i < framesPerBuffer; i++)
         {
             sData.s1 = SAMPLE_SILENCE; // Left
             if (NUM_CHANNELS == 2)
@@ -51,7 +52,7 @@ int AudioIO::recordCallback(const void *inputBuffer, void *outputBuffer,
     }
     else
     {
-        for (int i = 0; i < framesPerBuffer; i++)
+        for (unsigned long i = 0; i < framesPerBuffer; i++)
         {
             sData.s1 = *inputPtr++; /* left */
             if (NUM_CHANNELS == 2)
@@ -125,6 +126,9 @@ int AudioIO::close()
         return _err;
     }
 
+    // Clear the recording buffer and free memory.
+    clearRecordingBuffer();
+
     _isInitialized = false;
 
     return _err;
@@ -151,7 +155,7 @@ int AudioIO::startRecording()
 
 void AudioIO::storeRecording()
 {
-    std::cout << "Recording buffer into memory!\n";
+    std::cout << "Recording buffer into memory!" << std::endl;
     while (Pa_IsStreamActive(_stream))
     {
         StreamData data = {};
@@ -163,7 +167,11 @@ void AudioIO::storeRecording()
         // Check if block is full and allocate more memory for it
         if (blockData.empty() || blockData.back().frameIndex == blockData.back().maxFrames)
         {
-            blockData.push_back((BlockData){.maxFrames = BLOCK_BUFFER_SIZE, .frameIndex = 0});
+            BlockData _block = {};
+            _block.frameIndex = 0;
+            _block.maxFrames = BLOCK_BUFFER_SIZE;
+            _block.block = new SAMPLE[BLOCK_BUFFER_SIZE * NUM_CHANNELS];
+            blockData.push_back(_block);
         }
         BlockData &blockChunk = blockData.back();
         blockChunk.block[blockChunk.frameIndex*NUM_CHANNELS] = data.s1;
@@ -173,7 +181,7 @@ void AudioIO::storeRecording()
         }
         blockChunk.frameIndex++;
     }
-    std::cout << "Stream closed!\n";
+    std::cout << "Stream closed!" << std::endl;
     std::cout << "Data chunks used: " << blockData.size() << std::endl;
 }
 
@@ -204,5 +212,14 @@ int AudioIO::writeRecording(const char *fname)
         }
     }
     fclose(f);
+    return 0;
+}
+
+int AudioIO::clearRecordingBuffer()
+{
+    for (BlockData chunk : blockData) {
+        delete[] chunk.block;
+    }
+    blockData.clear();
     return 0;
 }

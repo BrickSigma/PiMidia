@@ -6,7 +6,7 @@
 #include <list>
 #include <thread>
 
-typedef _Float32 SAMPLE;
+typedef float SAMPLE;
 
 #define PA_SAMPLE_TYPE paFloat32;
 
@@ -46,7 +46,7 @@ public:
     {
         unsigned long maxFrames = BLOCK_BUFFER_SIZE;
         unsigned long frameIndex = 0;
-        SAMPLE block[BLOCK_BUFFER_SIZE * NUM_CHANNELS] = {0};
+        SAMPLE *block;
     } BlockData;
 
     AudioIO();
@@ -54,9 +54,43 @@ public:
     static int initialize();
     static int close();
 
+    /**
+     * Starts recording from default input device and saves the RAW audio to
+     * a buffer list in memory.
+     *
+     * Returns
+     *
+     * `paNoError` on success and a non-zero value on failure.
+     */
     static int startRecording();
+
+    /**
+     * Stops recording
+     *
+     * Returns
+     *
+     * `paNoError` on success and a non-zero value on failure.
+     */
     static int stopRecording();
+
+    /**
+     * Writes the recording to a RAW audio file.
+     *
+     * Returns
+     *
+     * `0` on success and `-1` on failure.
+     */
     static int writeRecording(const char *);
+
+    /**
+     * Clears the recording buffer.
+     *
+     * Returns
+     *
+     * `0` on success and `-1` on failure.
+     */
+    static int clearRecordingBuffer();
+
     static int playbackRecording();
     static int stopPlayback();
 
