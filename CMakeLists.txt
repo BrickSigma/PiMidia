@@ -19,7 +19,6 @@ set(PROJECT_SOURCES
     src/audio/AudioIO.h
     src/audio/AudioIO.cpp
     src/utility/CircularQueue.h
-    thirdparty/portaudio/include/portaudio.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -45,9 +44,7 @@ else()
     endif()
 endif()
 
-target_include_directories(PiMidia PRIVATE ./thirdparty/portaudio/include)
-add_subdirectory(./thirdparty/portaudio EXCLUDE_FROM_ALL)
-target_link_libraries(PiMidia PRIVATE Qt${QT_VERSION_MAJOR}::Widgets PRIVATE PortAudio)
+target_link_libraries(PiMidia PRIVATE Qt${QT_VERSION_MAJOR}::Widgets PRIVATE portaudio fluidsynth)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
